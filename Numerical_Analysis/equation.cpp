@@ -556,17 +556,19 @@ void calculateAdditionAndSubtraction(stack<string>& operat, stack<long double>& 
 long double bisection(vector<string> function, long double low_num, long double high_num, bool& check, int precision)
 {
 	long double mid_num = low_num;
-	while (high_num - low_num >= pow(10, -precision))
+	int n = (log10(high_num - mid_num) + precision) / log10(2) + 1;
+	for(int i = 1; i <= n; i++)
 	{
+		
 		// Find middle point
 		mid_num = low_num + (high_num - low_num) / 2.0;
 
 		// Check if middle point is root
 		if (calculateExpression(function, check, mid_num) == 0.0)
-			break;
+			return mid_num;
 
 		// Decide the side to repeat the steps
-		else if (signum(calculateExpression(function, check, low_num)) * signum(calculateExpression(function, check, high_num)) < 0)
+		else if (signum(calculateExpression(function, check, low_num)) * signum(calculateExpression(function, check, mid_num)) < 0)
 			high_num = mid_num;
 		else
 			low_num = mid_num;
