@@ -65,7 +65,6 @@ void input(vector<string>& function) {
 	function.push_back("=");
 }
 
-
 long double calculateExpression(vector<string> function, bool& check, pair<string, long double> variable[100]) {
 
 	//khoi tao hai ngan xep luu phep tinh va so
@@ -180,8 +179,6 @@ long double calculateExpression(vector<string> function, bool& check, pair<strin
 	}
 	return 0;
 }
-
-
 
 long double calculateExpression(vector<string> function, bool& check, long double variable) {
 
@@ -466,7 +463,6 @@ void calculateNegative(stack<string>& operat, stack<long double>& num, bool& che
 //Cac ham duoi day neu con du 2 so thi moi thuc hien, con ko thi in ra loi.
 //Ngoai ra ktra check de chi in ra dung 1 loi tren man hinh.
 
-
 void calculatePower(stack<string>& operat, stack<long double>& num, bool& check) {
 	while (!operat.empty() && operat.top() == "^" && check == true) {
 		if (num.size() >= 2) {
@@ -557,7 +553,7 @@ long double bisection(vector<string> function, long double low_num, long double 
 {
 	long double mid_num = low_num;
 	int n = (log10(high_num - mid_num) + precision) / log10(2) + 1;
-	for(int i = 1; i <= n; i++)
+	for (int i = 1; i <= n; i++)
 	{
 		
 		// Find middle point
@@ -574,4 +570,22 @@ long double bisection(vector<string> function, long double low_num, long double 
 			low_num = mid_num;
 	}
 	return mid_num;
+}
+
+long double fixedPointIteration(vector<string> &function, long double initVal, bool& check, int precision, int maxIteration) {
+
+	//f(x) = 0 => f(x) + x = x => Dung dang can xu li
+	function.insert(function.end() - 1, "+");
+	function.insert(function.end() - 1, "x");
+
+	long double res = initVal;
+	for (int i = 1; i <= maxIteration; i++) {
+		res = calculateExpression(function, check, res);
+		cout << i << " " << initVal << " " << res << endl;
+		if (abs(res - initVal) < pow(10, -precision)) return res;
+		initVal = res;
+	}
+
+	check = false;//neu khong ra ket qua nhu y muon thi tra ve false
+	return 0;
 }

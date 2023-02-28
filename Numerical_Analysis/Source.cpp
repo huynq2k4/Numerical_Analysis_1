@@ -15,6 +15,47 @@ enum feature{
 	PLAY_GAMES
 };
 
+void solveUsingBisection(pair<string, long double> variable, vector<string> func) {
+	cout << "Enter the interval (a, b):\n";
+	long double a, b;
+	bool check = true;//ktra xem trong phep tinh co loi hay khong, neu ko thi true, neu co thi false
+	do {
+		cout << "a = ";
+		cin >> a;
+		cout << "b = ";
+		cin >> b;
+		if (signum(calculateExpression(func, check, a)) * signum(calculateExpression(func, check, b)) >= 0) {
+			cout << "You have not assumed right a and b. Require f(a) * f(b) < 0.\n";
+		}
+	} while (signum(calculateExpression(func, check, a)) * signum(calculateExpression(func, check, b)) >= 0);
+
+	cout << "How many decimal places do you want to show? ";
+	int decimalPlace; cin >> decimalPlace;
+
+	cout << "The result is: " << fixed << setprecision(decimalPlace) << bisection(func, a, b, check, decimalPlace);
+}
+
+void solveUsingFixedPointIteration(pair<string, long double> variable, vector<string> func) {
+	cout << "Enter the initial approximation: ";
+	long double initVal; cin >> initVal;
+
+	cout << "How many decimal places do you want to show? ";
+	int decimalPlace; cin >> decimalPlace;
+
+	cout << "Enter the maximum number of iterations: ";
+	int maxIteration; cin >> maxIteration;
+
+	bool check = true;//kiem tra xem co dung duoc phuong phap nay khong
+	long double res = fixedPointIteration(func, initVal, check, decimalPlace, maxIteration);
+	if (check) {
+		cout << "The result is: " << fixed << setprecision(decimalPlace) << res;
+	}
+	else {
+		cout << "The method failed after " << maxIteration << " iterations.";
+	}
+
+}
+
 int main() {
 	cout << "Welcome to NQHApp!!!\n";
 	//sleep_for(seconds(1));
@@ -87,32 +128,18 @@ int main() {
 		}
 		case SOLVE_EQUATION:
 		{
-			cout << "Solve the equation f(x) = 0 by using bisection method with x in the interval (a,b).\n";
-			pair<string, long double> var[1];
+			cout << "Solve the equation f(x) = 0.\n";
+			pair<string, long double> var;
 
-			var[0].first = "x";
+			var.first = "x";
 
 			vector<string> func;
 
-			cout << "Enter the equation (note: only enter the left-hand side of the equation): \n";
+			cout << "f(x) = ";
 			input(func);
 
-			long double a, b;
-			bool check = true;//ktra xem trong phep tinh co loi hay khong, neu ko thi true, neu co thi false
-			do {
-				cout << "a = ";
-				cin >> a;
-				cout << "b = ";
-				cin >> b;
-				if (signum(calculateExpression(func, check, a)) * signum(calculateExpression(func, check, b)) >= 0) {
-					cout << "You have not assumed right a and b. Require f(a) * f(b) < 0.\n";
-				}
-			} while (signum(calculateExpression(func, check, a)) * signum(calculateExpression(func, check, b)) >= 0);
-
-			cout << "How many decimal places do you want to show? ";
-			int decimalPlace; cin >> decimalPlace;
-
-			cout << "The result is: " << fixed << setprecision(decimalPlace) << bisection(func, a, b, check, decimalPlace);
+			//solveUsingBisection(var, func);
+			solveUsingFixedPointIteration(var, func);
 
 			cin.ignore();
 
