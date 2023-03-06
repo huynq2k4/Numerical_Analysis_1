@@ -1,5 +1,6 @@
 #include <iomanip>
 #include "equation.h"
+#include "systemOfEquation.h"
 #include <chrono>
 #include <thread>
 
@@ -8,14 +9,43 @@ using namespace std::this_thread;
 using namespace std::chrono;
 
 enum feature{
-	DEFAULT,
+	DEFAULT_FEATURE,
 	CALCULATE_EXPRESSION,
 	SOLVE_EQUATION,
 	SOLVE_SYSTEM_EQUATIONS,
 	PLAY_GAMES
 };
 
-void solveUsingBisection(pair<string, long double> variable, vector<string> func) {
+enum equation {
+	DEFAULT_EQUATION,
+	BISECTION,
+	FIXED_POINT,
+	NEWTON,
+	SECANT,
+	FALSE_POSITION
+};
+
+enum system_of_equations {
+	DEFAULT_SYSTEM_EQUATIONS,
+	GAUSS_ELIMINATION,
+	DOOLITTLE,
+	CHOLESKY
+};
+
+
+
+void intro() {
+	cout << "Welcome to NQHApp!!!\n";
+	cout << "My app has the following features:\n";
+	cout << "-----------------------------\n";
+	cout << "1. Calculate the value of expression or function.\n";
+	cout << "2. Solve the equation.\n";
+	cout << "3. Solve system of equations.\n";
+	cout << "4. Chill with games.\n";
+	cout << "-----------------------------\n";
+}
+
+void solveUsingBisection(vector<string> func) {
 	cout << "Enter the interval (a, b):\n";
 	long double a, b;
 	bool check = true;//ktra xem trong phep tinh co loi hay khong, neu ko thi true, neu co thi false
@@ -32,47 +62,103 @@ void solveUsingBisection(pair<string, long double> variable, vector<string> func
 	cout << "How many decimal places do you want to show? ";
 	int decimalPlace; cin >> decimalPlace;
 
-	cout << "The result is: " << fixed << setprecision(decimalPlace) << bisection(func, a, b, check, decimalPlace);
+	long double res = bisection(func, a, b, check, decimalPlace);
+	if (check) {
+		cout << "The result is: " << fixed << setprecision(decimalPlace) << res;
+	}
+	else {
+		cout << "The method failed after " << MAX_ITERATION << " iterations.";
+	}
 }
 
-void solveUsingFixedPointIteration(pair<string, long double> variable, vector<string> func) {
+void solveUsingFixedPointIteration(vector<string> func) {
 	cout << "Enter the initial approximation: ";
 	long double initVal; cin >> initVal;
 
 	cout << "How many decimal places do you want to show? ";
 	int decimalPlace; cin >> decimalPlace;
 
-	cout << "Enter the maximum number of iterations: ";
-	int maxIteration; cin >> maxIteration;
-
 	bool check = true;//kiem tra xem co dung duoc phuong phap nay khong
-	long double res = fixedPointIteration(func, initVal, check, decimalPlace, maxIteration);
+	long double res = fixedPointIteration(func, initVal, check, decimalPlace);
 	if (check) {
 		cout << "The result is: " << fixed << setprecision(decimalPlace) << res;
 	}
 	else {
-		cout << "The method failed after " << maxIteration << " iterations.";
+		cout << "The method failed after " << MAX_ITERATION << " iterations.";
 	}
 
 }
 
+void solveUsingNewtonMethod(vector<string> func) {
+
+	cout << "Enter the initial approximation: ";
+	long double initVal; cin >> initVal;
+
+	cout << "How many decimal places do you want to show? ";
+	int decimalPlace; cin >> decimalPlace;
+
+	bool check = true;//kiem tra xem co dung duoc phuong phap nay khong
+	long double res = NewtonMethod(func, initVal, check, decimalPlace);
+	if (check) {
+		cout << "The result is: " << fixed << setprecision(decimalPlace) << res;
+	}
+	else {
+		cout << "The method failed after " << MAX_ITERATION << " iterations.";
+	}
+}
+
+void solveUsingSecantMethod(vector<string> func) {
+
+	cout << "Enter two initial approximation p0 and p1:\n";
+	cout << "p0 = ";
+	long double initVal1; cin >> initVal1;
+	cout << "p1 = ";
+	long double initVal2; cin >> initVal2;
+
+	cout << "How many decimal places do you want to show? ";
+	int decimalPlace; cin >> decimalPlace;
+
+	bool check = true;//kiem tra xem co dung duoc phuong phap nay khong
+	long double res = secant(func, initVal1, initVal2, check, decimalPlace);
+	if (check) {
+		cout << "The result is: " << fixed << setprecision(decimalPlace) << res;
+	}
+	else {
+		cout << "The method failed after " << MAX_ITERATION << " iterations.";
+	}
+
+}
+
+void solveUsingFalsePosition(vector<string> func) {
+
+	cout << "Enter two initial approximation:\n";
+	long double a, b;
+	bool check = true;//ktra xem trong phep tinh co loi hay khong, neu ko thi true, neu co thi false
+	do {
+		cout << "p0 = ";
+		cin >> a;
+		cout << "p1 = ";
+		cin >> b;
+		if (signum(calculateExpression(func, check, a)) * signum(calculateExpression(func, check, b)) >= 0) {
+			cout << "You have not assumed right p0 and p1. Require f(p0) * f(p1) < 0.\n";
+		}
+	} while (signum(calculateExpression(func, check, a)) * signum(calculateExpression(func, check, b)) >= 0);
+
+	cout << "How many decimal places do you want to show? ";
+	int decimalPlace; cin >> decimalPlace;
+
+	long double res = falsePosition(func, a, b, check, decimalPlace);
+	if (check) {
+		cout << "The result is: " << fixed << setprecision(decimalPlace) << res;
+	}
+	else {
+		cout << "The method failed after " << MAX_ITERATION << " iterations.";
+	}
+}
+
+
 int main() {
-	cout << "Welcome to NQHApp!!!\n";
-	//sleep_for(seconds(1));
-	cout << "My app has the following features:\n";
-	//sleep_for(seconds(2));
-	cout << "-----------------------------\n";
-	//sleep_for(seconds(1));
-	cout << "1. Calculate the value of expression or function.\n";
-	//sleep_for(seconds(1));
-	cout << "2. Solve the equation.\n";
-	//sleep_for(seconds(1));
-	cout << "3. Solve system of equations.\n";
-	//sleep_for(seconds(1));
-	cout << "4. Chill with games.\n";
-	//sleep_for(seconds(1));
-	cout << "-----------------------------\n";
-	//sleep_for(seconds(1));
+	intro();
 	while (1) {
 		cout << "Please enter the number corresponding to the feature you want to try: ";
 		int feat; cin >> feat;
@@ -129,17 +215,36 @@ int main() {
 		case SOLVE_EQUATION:
 		{
 			cout << "Solve the equation f(x) = 0.\n";
-			pair<string, long double> var;
-
-			var.first = "x";
-
-			vector<string> func;
-
 			cout << "f(x) = ";
+
+			vector<string> func;			
 			input(func);
 
-			//solveUsingBisection(var, func);
-			solveUsingFixedPointIteration(var, func);
+			cout << "Choose the method (1: Bisection, 2: Fixed-point Iteration, 3: Newton, 4: Secant, 5: False Position): ";
+			int option;
+
+			do {
+				cin >> option;
+				switch (option) {
+				case BISECTION:
+					solveUsingBisection(func);
+					break;
+				case FIXED_POINT:
+					solveUsingFixedPointIteration(func);
+					break;
+				case NEWTON:
+					solveUsingNewtonMethod(func);
+					break;
+				case SECANT:
+					solveUsingSecantMethod(func);
+					break;
+				case FALSE_POSITION:
+					solveUsingFalsePosition(func);
+					break;
+				default:
+					cout << "Invalid number. Please enter a number from 1 to 5 corresponding to the method above: ";
+				}
+			} while (option > 5 || option < 1);
 
 			cin.ignore();
 
@@ -147,7 +252,45 @@ int main() {
 			break;
 		}
 		case SOLVE_SYSTEM_EQUATIONS:
+		{
+			cout << "Enter the number of equations: ";
+			int n; cin >> n;
+
+			cout << "Enter the coefficients: \n";
+			long double** a = getSystemOfEquations(n, n + 1);
+
+			cout << "How many decimal places do you want to show? ";
+			int decimalPlace; cin >> decimalPlace;
+
+			cout << "Choose the method (1. Gaussian elimination, 2. Doolittle, 3. Cholesky): ";
+			int option;
+
+			do {
+				cin >> option;
+				switch (option) {
+				case GAUSS_ELIMINATION:
+					GaussianElimination(a, n, decimalPlace);
+					break;
+				case DOOLITTLE:
+					Doolittle(a, n, decimalPlace);
+					break;
+				case CHOLESKY:
+					Cholesky(a, n, decimalPlace);
+					break;
+				default:
+					cout << "Invalid number. Please enter a number from 1 to 3 corresponding to the method above: ";
+				}
+			} while (option > 3 || option < 1);
+			
+			//Delete pointer
+			for (int i = 0; i < n; i++) {
+				delete[] a[i];
+			}
+			delete[] a;
+
+			cin.ignore();
 			break;
+		}
 		case PLAY_GAMES:
 			break;
 		default:

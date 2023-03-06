@@ -1,10 +1,5 @@
 #include "equation.h"
 
-const long double E = 2.7182818284;
-const long double PI = atan(1) * 4;
-const long double ZERO_LIMIT = 0;
-const long double EPSILON = 10E-5;
-
 void calculateBasicFunc(stack<string>& operat, stack<long double>& num, bool& check);
 void calculatePower(stack<string>& operat, stack<long double>& num, bool& check);
 void calculateNegative(stack<string>& operat, stack<long double>& num, bool& check);
@@ -552,16 +547,17 @@ void calculateAdditionAndSubtraction(stack<string>& operat, stack<long double>& 
 long double bisection(vector<string> function, long double low_num, long double high_num, bool& check, int precision)
 {
 	long double mid_num = low_num;
-	int n = (log10(high_num - mid_num) + precision) / log10(2) + 1;
-	for (int i = 1; i <= n; i++)
+
+	for (int i = 1; i <= MAX_ITERATION; i++)
 	{
-		
 		// Find middle point
 		mid_num = low_num + (high_num - low_num) / 2.0;
 
 		// Check if middle point is root
-		if (calculateExpression(function, check, mid_num) == 0.0)
+		if (calculateExpression(function, check, mid_num) == 0.0 || (high_num - low_num) / 2 < pow(10, -precision)) {
+			cout << "Number of iterations: " << i << "." << endl;
 			return mid_num;
+		}
 
 		// Decide the side to repeat the steps
 		else if (signum(calculateExpression(function, check, low_num)) * signum(calculateExpression(function, check, mid_num)) < 0)
@@ -569,23 +565,93 @@ long double bisection(vector<string> function, long double low_num, long double 
 		else
 			low_num = mid_num;
 	}
+	check = false;//neu khong ra ket qua nhu y muon thi tra ve false
 	return mid_num;
 }
 
-long double fixedPointIteration(vector<string> &function, long double initVal, bool& check, int precision, int maxIteration) {
+long double fixedPointIteration(vector<string> &function, long double initVal, bool& check, int precision) {
 
-	//f(x) = 0 => f(x) + x = x => Dung dang can xu li
+	//Bien doi ve dung dang can xu li x = f(x)
 	function.insert(function.end() - 1, "+");
 	function.insert(function.end() - 1, "x");
 
 	long double res = initVal;
-	for (int i = 1; i <= maxIteration; i++) {
+	for (int i = 1; i <= MAX_ITERATION; i++) {
 		res = calculateExpression(function, check, res);
-		cout << i << " " << initVal << " " << res << endl;
-		if (abs(res - initVal) < pow(10, -precision)) return res;
+		if (abs(res - initVal) < pow(10, -precision))
+		{
+			cout << "Number of iterations: " << i << "." << endl;
+			return res;
+		}
 		initVal = res;
 	}
 
 	check = false;//neu khong ra ket qua nhu y muon thi tra ve false
 	return 0;
+}
+
+long double NewtonMethod(vector<string>& function, long double initVal, bool& check, int precision) {
+
+	long double res = initVal;
+
+	for (int i = 1; i <= MAX_ITERATION; i++) {
+		res = initVal - calculateExpression(function, check, res) / derivative(function, check, res);
+		if (abs(res - initVal) < pow(10, -precision)) {
+			cout << "Number of iterations: " << i << "." << endl;
+			return res;
+		}
+		initVal = res;
+	}
+
+	check = false;//neu khong ra ket qua nhu y muon thi tra ve false
+	return 0;
+}
+
+long double derivative(vector<string> function, bool& check, long double variable) {
+	long double res = (calculateExpression(function, check, variable + 1.0e-7) - calculateExpression(function, check, variable - 1.0e-7)) / 2 / 1.0e-7;
+	if (check == true) return res;
+	return -1;
+}
+
+long double secant(vector<string>& function, long double initVal1, long double initVal2, bool& check, int precision) {
+
+	long double res = 0;
+	
+	for (int i = 2; i <= MAX_ITERATION; i++) {
+		res = initVal2 - calculateExpression(function, check, initVal2) * (initVal2 - initVal1) / (calculateExpression(function, check, initVal2) - calculateExpression(function, check, initVal1));
+		if (abs(res - initVal2) < pow(10, -precision)) {
+			cout << "Number of iterations: " << i << "." << endl;
+			return res;
+		}
+		initVal1 = initVal2;
+		initVal2 = res;
+	}
+
+	check = false;//neu khong ra ket qua nhu y muon thi tra ve false
+	return 0;
+}
+
+
+long double falsePosition(vector<string>& function, long double initVal1, long double initVal2, bool& check, int precision) {
+
+	long double res = 0;
+
+	for (int i = 2; i <= MAX_ITERATION; i++) {
+
+		res = initVal2 - calculateExpression(function, check, initVal2) * (initVal2 - initVal1) / (calculateExpression(function, check, initVal2) - calculateExpression(function, check, initVal1));
+
+		if (abs(res - initVal2) < pow(10, -precision)) {
+			cout << "Number of iterations: " << i << "." << endl;
+			return res;
+		}
+
+		//lua chon diem de tinh gia tri tiep theo
+		if (signum(calculateExpression(function, check, res)) * signum(calculateExpression(function, check, initVal2)) < 0) initVal1 = initVal2;
+		initVal2 = res;
+
+	}
+
+	check = false;//neu khong ra ket qua nhu y muon thi tra ve false
+	return 0;
+
 }

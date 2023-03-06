@@ -129,9 +129,11 @@
   <ItemGroup>
     <ClCompile Include="equation.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="systemOfEquation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="equation.h" />
+    <ClInclude Include="systemOfEquation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

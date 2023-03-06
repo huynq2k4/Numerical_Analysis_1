@@ -21,9 +21,15 @@
     <ClCompile Include="equation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="systemOfEquation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="equation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="systemOfEquation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
