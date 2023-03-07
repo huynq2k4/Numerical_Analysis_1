@@ -336,6 +336,93 @@ void Cholesky(long double** system, int n, int precision)
     delete[] solution;
 }
 
+void Jacobi(long double** system, int n, long double* initVal, int precision)
+{
+    //Initialize solution array
+    long double* solution = new long double[n];
+    for (int i = 0; i < n; i++) {
+        solution[i] = 0;
+    }
+
+    for (int i = 1; i <= MAX_ITERATION; i++) {
+        for (int j = 0; j < n; j++) {
+            solution[j] = system[j][n];
+            for (int k = 0; k < n; k++) {
+                if (k != j) {
+                    solution[j] -= (system[j][k] * initVal[k]);
+                }
+            }
+            solution[j] /= system[j][j];
+        }
+        long double norm = 0;
+        for (int j = 0; j < n; j++) {
+            norm += ((solution[j] - initVal[j]) * (solution[j] - initVal[j]));
+        }
+        norm = sqrt(norm);
+
+        //Set stop condition
+        if (norm < pow(10, -precision)) {
+            cout << "The solution is: \n";
+            for (int j = 0; j < n; j++) {
+                cout << fixed << setprecision(precision) << solution[j] << endl;
+            }
+            return;
+        }
+        else {
+            for (int j = 0; j < n; j++) {
+                initVal[j] = solution[j];
+            }
+        }
+    }
+
+    cout << "The method failed after " << MAX_ITERATION << " iterations." << endl;
+    delete[] solution;
+}
+
+void GaussSeidel(long double** system, int n, long double* initVal, int precision)
+{
+    //Initialize solution array
+    long double* solution = new long double[n];
+    for (int i = 0; i < n; i++) {
+        solution[i] = 0;
+    }
+
+    for (int i = 1; i <= MAX_ITERATION; i++) {
+        for (int j = 0; j < n; j++) {
+            solution[j] = system[j][n];
+            for (int k = 0; k < j; k++) {
+                solution[j] -= (system[j][k] * solution[k]);
+            }
+            for (int k = j + 1; k < n; k++) {
+                solution[j] -= (system[j][k] * initVal[k]);
+            }
+            solution[j] /= system[j][j];
+        }
+        long double norm = 0;
+        for (int j = 0; j < n; j++) {
+            norm += ((solution[j] - initVal[j]) * (solution[j] - initVal[j]));
+        }
+        norm = sqrt(norm);
+
+        //Set stop condition
+        if (norm < pow(10, -precision)) {
+            cout << "The solution is: \n";
+            for (int j = 0; j < n; j++) {
+                cout << fixed << setprecision(precision) << solution[j] << endl;
+            }
+            return;
+        }
+        else {
+            for (int j = 0; j < n; j++) {
+                initVal[j] = solution[j];
+            }
+        }
+    }
+
+    cout << "The method failed after " << MAX_ITERATION << " iterations." << endl;
+    delete[] solution;
+}
+
 
 void exchangeRows(long double** a, int nCols, int i, int j) {
     for (int k = 0; k < nCols; k++) {

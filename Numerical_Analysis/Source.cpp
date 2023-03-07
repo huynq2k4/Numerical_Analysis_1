@@ -29,7 +29,9 @@ enum system_of_equations {
 	DEFAULT_SYSTEM_EQUATIONS,
 	GAUSS_ELIMINATION,
 	DOOLITTLE,
-	CHOLESKY
+	CHOLESKY,
+	JACOBI,
+	GAUSS_SEIDEL
 };
 
 
@@ -41,7 +43,6 @@ void intro() {
 	cout << "1. Calculate the value of expression or function.\n";
 	cout << "2. Solve the equation.\n";
 	cout << "3. Solve system of equations.\n";
-	cout << "4. Chill with games.\n";
 	cout << "-----------------------------\n";
 }
 
@@ -262,7 +263,7 @@ int main() {
 			cout << "How many decimal places do you want to show? ";
 			int decimalPlace; cin >> decimalPlace;
 
-			cout << "Choose the method (1. Gaussian elimination, 2. Doolittle, 3. Cholesky): ";
+			cout << "Choose the method (1. Gaussian elimination, 2. Doolittle, 3. Cholesky, 4. Jacobi, 5. Gauss-Seidel): ";
 			int option;
 
 			do {
@@ -277,10 +278,28 @@ int main() {
 				case CHOLESKY:
 					Cholesky(a, n, decimalPlace);
 					break;
-				default:
-					cout << "Invalid number. Please enter a number from 1 to 3 corresponding to the method above: ";
+				case JACOBI:
+				{
+					long double* initVal = new long double[n];
+					cout << "Enter the initial approximation: ";
+					for (int i = 0; i < n; i++) cin >> initVal[i];
+					Jacobi(a, n, initVal, decimalPlace);
+					delete[] initVal;
+					break;
 				}
-			} while (option > 3 || option < 1);
+				case GAUSS_SEIDEL:
+				{
+					long double* initVal = new long double[n];
+					cout << "Enter the initial approximation: ";
+					for (int i = 0; i < n; i++) cin >> initVal[i];
+					GaussSeidel(a, n, initVal, decimalPlace);
+					delete[] initVal;
+					break;
+				}
+				default:
+					cout << "Invalid number. Please enter a number from 1 to 5 corresponding to the method above: ";
+				}
+			} while (option > 5 || option < 1);
 			
 			//Delete pointer
 			for (int i = 0; i < n; i++) {
@@ -291,10 +310,8 @@ int main() {
 			cin.ignore();
 			break;
 		}
-		case PLAY_GAMES:
-			break;
 		default:
-			cout << "You're an idiot!!!!!\n";
+			cout << "Invalid number. Please enter a number from 1 to 3.\n";
 		}
 		cout << "-----------------------------\n";
 
