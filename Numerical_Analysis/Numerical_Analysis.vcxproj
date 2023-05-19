@@ -127,12 +127,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="approximation.cpp" />
+    <ClCompile Include="derivativeIntegration.cpp" />
     <ClCompile Include="equation.cpp" />
+    <ClCompile Include="interpolation.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="systemOfEquation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="approximation.h" />
+    <ClInclude Include="derivativeIntegration.h" />
     <ClInclude Include="equation.h" />
+    <ClInclude Include="interpolation.h" />
     <ClInclude Include="systemOfEquation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

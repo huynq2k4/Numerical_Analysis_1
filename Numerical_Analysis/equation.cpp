@@ -12,6 +12,12 @@ int signum(long double x) {
 	return 0;
 }
 
+long double derivative(vector<string> function, bool& check, long double variable) {
+	long double res = (calculateExpression(function, check, variable + 1.0e-7) - calculateExpression(function, check, variable - 1.0e-7)) / 2 / 1.0e-7;
+	if (check == true) return res;
+	return -1;
+}
+
 void input(vector<string>& function) {
 	string s; getline(cin, s);
 	s.erase(remove(s.begin(), s.end(), ' '), s.end());
@@ -607,11 +613,6 @@ long double NewtonMethod(vector<string>& function, long double initVal, bool& ch
 	return 0;
 }
 
-long double derivative(vector<string> function, bool& check, long double variable) {
-	long double res = (calculateExpression(function, check, variable + 1.0e-7) - calculateExpression(function, check, variable - 1.0e-7)) / 2 / 1.0e-7;
-	if (check == true) return res;
-	return -1;
-}
 
 long double secant(vector<string>& function, long double initVal1, long double initVal2, bool& check, int precision) {
 

@@ -24,12 +24,30 @@
     <ClCompile Include="systemOfEquation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="interpolation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="approximation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="derivativeIntegration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="equation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="systemOfEquation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpolation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="approximation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="derivativeIntegration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

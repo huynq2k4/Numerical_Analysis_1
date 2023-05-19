@@ -1,6 +1,9 @@
 #include <iomanip>
 #include "equation.h"
 #include "systemOfEquation.h"
+#include "interpolation.h"
+#include "approximation.h"
+#include "derivativeIntegration.h"
 #include <chrono>
 #include <thread>
 
@@ -8,11 +11,17 @@ using namespace std;
 using namespace std::this_thread;
 using namespace std::chrono;
 
+//const long double ALPHA = 1.0 / 3.0;
+
 enum feature{
 	DEFAULT_FEATURE,
 	CALCULATE_EXPRESSION,
 	SOLVE_EQUATION,
 	SOLVE_SYSTEM_EQUATIONS,
+	INTERPOLATION,
+	APPROXIMATION,
+	DERIVATIVE,
+	INTEGRATION,
 	PLAY_GAMES
 };
 
@@ -34,6 +43,24 @@ enum system_of_equations {
 	GAUSS_SEIDEL
 };
 
+enum interpolation {
+
+};
+
+enum approximation {
+
+};
+
+enum derivative {
+
+};
+
+enum integration {
+	SIMPSON,
+	TRAPEZOID,
+	MIDPOINT
+};
+
 
 
 void intro() {
@@ -43,6 +70,10 @@ void intro() {
 	cout << "1. Calculate the value of expression or function.\n";
 	cout << "2. Solve the equation.\n";
 	cout << "3. Solve system of equations.\n";
+	cout << "4. Polynomial interpolation through a set of points.\n";
+	cout << "5. Polynomial approximation for a set of points or a function.\n";
+	cout << "6. Calculate the derivative of a function at a given point.\n";
+	cout << "7. Calculate the integration of a function over an interval.\n";
 	cout << "-----------------------------\n";
 }
 
@@ -158,6 +189,7 @@ void solveUsingFalsePosition(vector<string> func) {
 }
 
 
+
 int main() {
 	intro();
 	while (1) {
@@ -260,6 +292,8 @@ int main() {
 			cout << "Enter the coefficients: \n";
 			long double** a = getSystemOfEquations(n, n + 1);
 
+			long double* solution = nullptr;
+
 			cout << "How many decimal places do you want to show? ";
 			int decimalPlace; cin >> decimalPlace;
 
@@ -270,29 +304,29 @@ int main() {
 				cin >> option;
 				switch (option) {
 				case GAUSS_ELIMINATION:
-					GaussianElimination(a, n, decimalPlace);
+					solution = GaussianElimination(a, n);
 					break;
 				case DOOLITTLE:
-					Doolittle(a, n, decimalPlace);
+					solution = Doolittle(a, n);
 					break;
 				case CHOLESKY:
-					Cholesky(a, n, decimalPlace);
+					solution = Cholesky(a, n);
 					break;
 				case JACOBI:
 				{
-					long double* initVal = new long double[n];
 					cout << "Enter the initial approximation: ";
+					long double* initVal = new long double[n];
 					for (int i = 0; i < n; i++) cin >> initVal[i];
-					Jacobi(a, n, initVal, decimalPlace);
+					solution = Jacobi(a, n, initVal, decimalPlace);
 					delete[] initVal;
 					break;
 				}
 				case GAUSS_SEIDEL:
 				{
-					long double* initVal = new long double[n];
 					cout << "Enter the initial approximation: ";
+					long double* initVal = new long double[n];
 					for (int i = 0; i < n; i++) cin >> initVal[i];
-					GaussSeidel(a, n, initVal, decimalPlace);
+					solution = GaussSeidel(a, n, initVal, decimalPlace);
 					delete[] initVal;
 					break;
 				}
@@ -301,13 +335,275 @@ int main() {
 				}
 			} while (option > 5 || option < 1);
 			
+			if (solution != nullptr) {
+				cout << "The solution is:\n";
+				for (int i = 0; i < n; i++) {
+					cout << fixed << setprecision(decimalPlace) << solution[i] << endl;
+				}
+			}
+
 			//Delete pointer
 			for (int i = 0; i < n; i++) {
 				delete[] a[i];
 			}
 			delete[] a;
+			delete[] solution;
 
 			cin.ignore();
+			break;
+		}
+		case INTERPOLATION:
+		{
+			cout << "Enter the number of points: ";
+			int n; cin >> n;
+			while (n <= 1) {
+				cout << "Not enough point! Please enter the number of points greater than 1: ";
+				cin >> n;
+			}
+			cout << "Enter list of points (x-coordinate has to be different): " << endl;
+			vector<pair<long double, long double>> v(n);
+			for (int i = 0; i < n; i++) {
+				double x, y; cin >> x >> y;
+				v[i] = make_pair(x, y);
+			}
+			
+			vector<vector<long double>> d = DividedDifferences(v);
+			cout << "Enter the point (x-coordinate): ";
+			double nextPoint; cin >> nextPoint;
+			cout << "The value for Lagrange is: " << LagrangeInterpolation(v, nextPoint) << endl;
+			cout << "The value for backward is: " << NewtonBackwardDifference(d, v, nextPoint) << endl;
+			cout << "The value for forward is: " << NewtonForwardDifference(d, v, nextPoint) << endl;
+
+			vector<vector<long double>> cubicSpline = NaturalCubicSpline(v);
+			for (int i = 0; i < cubicSpline.size(); i++) {
+				for (int j = 0; j < 4; j++) {
+					cout << cubicSpline[i][j] << " ";
+				}
+				cout << endl;
+			}
+			break;
+		}
+		case APPROXIMATION:
+		{
+			cout << "Choose type of data to approximate (1. Discrete set of points, 2. Function): ";
+			int option; cin >> option;
+			while (option != 1 && option != 2) {
+				cout << "Invalid number! Please choose again: ";
+				cin >> option;
+			}
+
+			long double* coefficient = nullptr;
+			int degree;
+
+			if (option == 1) {
+				cout << "Enter the number of points: ";
+				int n; cin >> n;
+				while (n <= 1) {
+					cout << "Not enough point! Please enter the number of points greater than 1: ";
+					cin >> n;
+				}
+				cout << "Enter list of points (x-coordinate has to be different): " << endl;
+				vector<pair<long double, long double>> v(n);
+				for (int i = 0; i < n; i++) {
+					double x, y; cin >> x >> y;
+					v[i] = make_pair(x, y);
+				}
+
+
+				cout << "Polynomial approximation with degree = ";
+				cin >> degree;
+				coefficient = DiscreteLeastSquare(v, degree);
+
+
+				
+			}
+			else if (option == 2) {
+				cout << "f(x) = ";
+				cin.ignore();
+				vector<string> func;
+				input(func);
+
+				cout << "Enter the interval [a, b]: \n";
+				long double a, b;
+				cout << "a = "; cin >> a;
+				cout << "b = "; cin >> b;
+
+				cout << "Polynomial approximation with degree = ";
+				cin >> degree;
+				coefficient = FunctionLeastSquare(func, degree, a, b);
+
+
+			}
+			cout << "Least squares polynomial is: ";
+			bool hasPlus = false;
+			if (coefficient[0] != 0.0) {
+				cout << coefficient[0];
+				hasPlus = true;
+			}
+			if (coefficient[1] != 0.0) {
+				if (coefficient[1] > 0) {
+					if (hasPlus) cout << "+";
+					else hasPlus = true;
+				}
+				cout << coefficient[1] << "x";
+			}
+			for (int i = 2; i <= degree; i++) {
+				if (coefficient[i] != 0.0) {
+					if (coefficient[i] > 0) {
+						if (hasPlus) cout << "+";
+						else hasPlus = true;
+					}
+					cout << coefficient[i] << "x^" << i;
+				}
+			}
+			cout << endl;
+			delete[] coefficient;
+			break;
+		}
+		case DERIVATIVE:
+		{
+			cout << "Choose type of derivative (1. f'(x), 2. f''(x)): ";
+			int type; cin >> type;
+			while (type != 1 && type != 2) {
+				cout << "Invalid number! Please choose again: ";
+				cin >> type;
+			}
+
+			cout << "f(x) = ";
+			cin.ignore();
+			vector<string> func;
+			input(func);
+
+			if (type == 1) {
+				cout << "Choose the number of points (3 or 5): ";
+				int point; cin >> point;
+				while (point != 3 && point != 5) {
+					cout << "Invalid number! Please choose again: ";
+					cin >> point;
+				}
+				cout << "Choose the method (1. Midpoint, 2. Endpoint): ";
+				int option; cin >> option;
+				while (option != 1 && option != 2) {
+					cout << "Invalid number! Please choose again: ";
+					cin >> option;
+				}
+				long double x0, h; vector<long double> fx(point);
+				cout << "x0 = "; cin >> x0;
+				cout << "h = "; cin >> h;
+				long double res;
+				if (point == 3) {
+
+
+					if (option == 1) {
+						for (int i = 0; i < 3; i++) {
+							bool check = true;
+							pair<string, long double> p[1] = { {"x", x0 + (i - 1) * h} };
+							long double tmp = calculateExpression(func, check, p);
+							fx[i] = tmp;
+						}
+						res = ThreePointDerivative(x0, fx, h, true);
+					}
+					else if (option == 2) {
+						for (int i = 0; i < 3; i++) {
+							bool check = true;
+							pair<string, long double> p[1] = { {"x", x0 + i * h} };
+							long double tmp = calculateExpression(func, check, p);
+							fx[i] = tmp;
+						}
+						res = ThreePointDerivative(x0, fx, h, false);
+					}
+
+				}
+				if (point == 5) {
+
+					if (option == 1) {
+						for (int i = 0; i < 5; i++) {
+							bool check = true;
+							pair<string, long double> p[1] = { {"x", x0 + (i - 2) * h} };
+							long double tmp = calculateExpression(func, check, p);
+							fx[i] = tmp;
+						}
+						res = FivePointDerivative(x0, fx, h, true);
+					}
+					else if (option == 2) {
+						for (int i = 0; i < 5; i++) {
+							bool check = true;
+							pair<string, long double> p[1] = { {"x", x0 + i * h} };
+							long double tmp = calculateExpression(func, check, p);
+							fx[i] = tmp;
+						}
+						res = FivePointDerivative(x0, fx, h, false);
+					}
+				}
+				cout << "f'(x0) = " << res;
+			}
+			else if (type == 2) {
+				long double x0, h; vector<long double> fx(3);
+				cout << "x0 = "; cin >> x0;
+				cout << "h = "; cin >> h;
+				for (int i = 0; i < 3; i++) {
+					bool check = true;
+					pair<string, long double> p[1] = { {"x", x0 + (i - 1) * h} };
+					long double tmp = calculateExpression(func, check, p);
+					fx[i] = tmp;
+				}
+				long double res = SecondDerivativeMidpoint(x0, fx, h);
+				cout << "f''(x) = " << res;
+			}
+			cout << endl;
+			break;
+		}
+		case INTEGRATION:
+		{
+			long double res = 0;
+
+			cout << "Choose the method (1. Simpson's rule, 2. Trapezodial rule, 3. Midpoint rule): ";
+			int option; cin >> option;
+			while (option < 0 || option > 3) {
+				cout << "Invalid number! Please choose again: ";
+				cin >> option;
+			}
+
+			cout << "f(x) = ";
+			cin.ignore();
+			vector<string> func;
+			input(func);
+
+			cout << "Enter the interval [a, b]:\n";
+			long double a, b;
+			cout << "a = "; cin >> a;
+			cout << "b = "; cin >> b;
+
+			cout << "Enter the number of intervals divided (even for Simpson and Midpoint rule): ";
+			switch (option) {
+			case SIMPSON:
+			{
+				int n; cin >> n;
+				while (n % 2 != 0) {
+					cout << "Invalid number! The number of intervals divided has to be even. Please enter again: ";
+					cin >> n;
+				}
+				res = SimpsonIntegration(func, a, b, n);
+				break;
+			}
+			case TRAPEZOID:
+			{
+				int n; cin >> n;
+				res = TrapezoidIntegration(func, a, b, n);
+				break;
+			}
+			case MIDPOINT:
+			{
+				int n; cin >> n;
+				while (n % 2 != 0) {
+					cout << "Invalid number! The number of intervals divided has to be even. Please enter again: ";
+					cin >> n;
+				}
+				res = MidpointIntegration(func, a, b, n);
+				break;
+			}
+			}
+			cout << "The result is: " << res << endl;
 			break;
 		}
 		default:

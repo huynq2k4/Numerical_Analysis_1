@@ -67,20 +67,9 @@ long double** getSystemOfEquations(int nRows, int nCols) {
     return sys;
 }
 
-void getRes(long double** a, int nRows, int nCols) {
-    cout << "-------------------" << endl;
-    for (int i = 0; i < nRows; i++) {
-        for (int j = 0; j < nCols; j++) {
-            cout << fixed << setprecision(4) << a[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << "-------------------" << endl;
-}
-
-void GaussianElimination(long double** system, int n, int precision)
+long double* GaussianElimination(long double** system, int n)
 {
-    for (int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < n - 1; i++) {//Step 1
         /*long double pivotValue = 0;
         for (int j = i; j < n; j++) {
             long double pivotValue_tmp = abs(system[j][i]);
@@ -89,7 +78,7 @@ void GaussianElimination(long double** system, int n, int precision)
             }
             if (pivotValue_tmp == 0) {
                 cout << "No unique solution exists." << endl;
-                return;
+                return nullptr;
             }
             else {
                 pivotValue_tmp = abs(system[j][i]) / pivotValue_tmp;
@@ -107,37 +96,44 @@ void GaussianElimination(long double** system, int n, int precision)
         }
         if (system[pivotRow][i] == 0.0) {
             cout << "No unique solution exists." << endl;
-            return;
-        }
+            return nullptr;
+        }//Step 2
         else {
             exchangeRows(system, n + 1, i, pivotRow);
-        }
-        for (int j = i + 1; j < n; j++) {
-            long double f = system[j][i] / system[i][i];
+        }//Step 3
+        for (int j = i + 1; j < n; j++) {//Step 4
+            long double f = system[j][i] / system[i][i];//Step 5
             for (int k = i + 1; k < n + 1; k++) {
-                system[j][k] -= system[i][k] * f;
+                system[j][k] -= system[i][k] * f;//Step 6
             }
-            system[j][i] = 0;
+            //system[j][i] = 0;
         }   
     }
     if (system[n - 1][n - 1] == 0.0) {
         cout << "No unique solution exists." << endl;
-        return;
-    }
+        return nullptr;
+    }//Step 7
 
     //Backward substitution
-    system[n - 1][n] /= system[n - 1][n - 1];
+    system[n - 1][n] /= system[n - 1][n - 1];//Step 8
     for (int i = n - 2; i >= 0; i--) {
         for (int j = i + 1; j < n; j++) {
             system[i][n] -= (system[i][j] * system[j][n]);
         }
         system[i][n] /= system[i][i];
-    }
+    }//Step 9
 
-    showResult(system, n, precision);
+    //Step 10
+    long double* solution = new long double[n];
+    for (int i = 0; i < n; i++) {
+        solution[i] = system[i][n];
+    }
+    return solution;
+
+    //showResult(system, n, precision);
 }
 
-void Doolittle(long double** system, int n, int precision)
+long double* Doolittle(long double** system, int n)
 {
     //Create lower triangular matrix 
     long double** l = new long double* [n];
@@ -168,7 +164,7 @@ void Doolittle(long double** system, int n, int precision)
     u[0][0] = system[0][0];
     if (u[0][0] == 0) {
         cout << "No unique solution exists." << endl;
-        return;
+        return nullptr;
     }
     for (int i = 1; i < n; i++) {
         u[0][i] = system[0][i];
@@ -181,7 +177,7 @@ void Doolittle(long double** system, int n, int precision)
         }
         if (u[i][i] == 0) {
             cout << "No unique solution exists." << endl;
-            return;
+            return nullptr;
         }
         for (int j = i + 1; j < n; j++) {
             u[i][j] = system[i][j];
@@ -200,7 +196,7 @@ void Doolittle(long double** system, int n, int precision)
     }
     if (u[n - 1][n - 1] == 0) {
         cout << "No unique solution exists." << endl;
-        return;
+        return nullptr;
     }
 
     //Forward substitution L(Ux) = b
@@ -220,12 +216,6 @@ void Doolittle(long double** system, int n, int precision)
         solution[i] /= u[i][i];
     }
 
-    //Print the solution
-    cout << "The solution is:\n";
-    for (int i = 0; i < n; i++) {
-        cout << fixed << setprecision(precision) << solution[i] << endl;
-    }
-
     //Delete pointer
     for (int i = 0; i < n; i++) {
         delete[] l[i];
@@ -233,17 +223,17 @@ void Doolittle(long double** system, int n, int precision)
     }
     delete[] l;
     delete[] u;
-    delete[] solution;
+    return solution;
 }
 
-void Cholesky(long double** system, int n, int precision)
+long double* Cholesky(long double** system, int n)
 {
     //Check if the coefficient matrix is symmetric
     for (int i = 0; i < n; i++) {
         for (int j = 0; j <= i; j++) {
             if (system[i][j] != system[j][i]) {
                 cout << "Cannot use Cholesky's method since the coefficient matrix is not symmetric.\n";
-                return;
+                return nullptr;
             }
         }
     }
@@ -266,7 +256,7 @@ void Cholesky(long double** system, int n, int precision)
     //Calculate value for lower triangular matrix
     if (system[0][0] <= 0) {
         cout << "Cannot use Cholesky's method since the coefficient matrix is not positive definite.\n";
-        return;
+        return nullptr;
     }
     else {
         l[0][0] = sqrt(system[0][0]);
@@ -281,7 +271,7 @@ void Cholesky(long double** system, int n, int precision)
         }
         if (l[i][i] < 0) {
             cout << "Cannot use Cholesky's method since the coefficient matrix is not positive definite.\n";
-            return;
+            return nullptr;
         }
         else {
             l[i][i] = sqrt(l[i][i]);
@@ -300,7 +290,7 @@ void Cholesky(long double** system, int n, int precision)
     }
     if (l[n - 1][n - 1] < 0) {
         cout << "Cannot use Cholesky's method since the coefficient matrix is not positive definite.\n";
-        return;
+        return nullptr;
     }
     else {
         l[n - 1][n - 1] = sqrt(l[n - 1][n - 1]);
@@ -322,21 +312,15 @@ void Cholesky(long double** system, int n, int precision)
         solution[i] /= l[i][i];
     }
 
-    //Print the solution
-    cout << "The solution is:\n";
-    for (int i = 0; i < n; i++) {
-        cout << fixed << setprecision(precision) << solution[i] << endl;
-    }
-
     //Delete pointer
     for (int i = 0; i < n; i++) {
         delete[] l[i];
     }
     delete[] l;
-    delete[] solution;
+    return solution;
 }
 
-void Jacobi(long double** system, int n, long double* initVal, int precision)
+long double* Jacobi(long double** system, int n, long double* initVal, int precision)
 {
     //Initialize solution array
     long double* solution = new long double[n];
@@ -362,11 +346,7 @@ void Jacobi(long double** system, int n, long double* initVal, int precision)
 
         //Set stop condition
         if (norm < pow(10, -precision)) {
-            cout << "The solution is: \n";
-            for (int j = 0; j < n; j++) {
-                cout << fixed << setprecision(precision) << solution[j] << endl;
-            }
-            return;
+            return solution;
         }
         else {
             for (int j = 0; j < n; j++) {
@@ -376,10 +356,10 @@ void Jacobi(long double** system, int n, long double* initVal, int precision)
     }
 
     cout << "The method failed after " << MAX_ITERATION << " iterations." << endl;
-    delete[] solution;
+    return nullptr;
 }
 
-void GaussSeidel(long double** system, int n, long double* initVal, int precision)
+long double* GaussSeidel(long double** system, int n, long double* initVal, int precision)
 {
     //Initialize solution array
     long double* solution = new long double[n];
@@ -406,21 +386,19 @@ void GaussSeidel(long double** system, int n, long double* initVal, int precisio
 
         //Set stop condition
         if (norm < pow(10, -precision)) {
-            cout << "The solution is: \n";
-            for (int j = 0; j < n; j++) {
-                cout << fixed << setprecision(precision) << solution[j] << endl;
-            }
-            return;
+            return solution;
         }
         else {
             for (int j = 0; j < n; j++) {
                 initVal[j] = solution[j];
+                cout << solution[j] << " ";
             }
+            cout << endl;
         }
     }
 
     cout << "The method failed after " << MAX_ITERATION << " iterations." << endl;
-    delete[] solution;
+    return nullptr;
 }
 
 
