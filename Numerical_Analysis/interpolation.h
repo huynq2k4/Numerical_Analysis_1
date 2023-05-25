@@ -11,3 +11,4 @@ long double NewtonForwardDifference(vector<vector<long double>> dividedDifferenc
 long double NewtonBackwardDifference(vector<vector<long double>> dividedDifference, vector<pair<long double, long double>> point, long double nextPointX);
 
 vector<vector<long double>> NaturalCubicSpline(vector<pair<long double, long double>> point);
+vector<vector<long double>> ClampedCubicSpline(vector<pair<long double, long double>> point, long double FPO, long double FPN);

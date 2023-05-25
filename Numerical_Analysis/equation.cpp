@@ -602,6 +602,7 @@ long double NewtonMethod(vector<string>& function, long double initVal, bool& ch
 
 	for (int i = 1; i <= MAX_ITERATION; i++) {
 		res = initVal - calculateExpression(function, check, res) / derivative(function, check, res);
+		cout << res << endl;
 		if (abs(res - initVal) < pow(10, -precision)) {
 			cout << "Number of iterations: " << i << "." << endl;
 			return res;

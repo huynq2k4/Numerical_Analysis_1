@@ -4,6 +4,7 @@
 #include "interpolation.h"
 #include "approximation.h"
 #include "derivativeIntegration.h"
+#include "ode.h"
 #include <chrono>
 #include <thread>
 
@@ -11,7 +12,6 @@ using namespace std;
 using namespace std::this_thread;
 using namespace std::chrono;
 
-//const long double ALPHA = 1.0 / 3.0;
 
 enum feature{
 	DEFAULT_FEATURE,
@@ -22,7 +22,8 @@ enum feature{
 	APPROXIMATION,
 	DERIVATIVE,
 	INTEGRATION,
-	PLAY_GAMES
+	ODE,
+	EIGENVALUE
 };
 
 enum equation {
@@ -56,6 +57,7 @@ enum derivative {
 };
 
 enum integration {
+	DEFAULT_INTEGRATION,
 	SIMPSON,
 	TRAPEZOID,
 	MIDPOINT
@@ -74,6 +76,8 @@ void intro() {
 	cout << "5. Polynomial approximation for a set of points or a function.\n";
 	cout << "6. Calculate the derivative of a function at a given point.\n";
 	cout << "7. Calculate the integration of a function over an interval.\n";
+	cout << "8. Solve ordinary differential equation (ODE) or system of ODEs.\n";
+	cout << "9. Calculate the dominant eigenvalue and corresponding eigenvector of a square matrix.\n";
 	cout << "-----------------------------\n";
 }
 
@@ -374,10 +378,25 @@ int main() {
 			cout << "The value for backward is: " << NewtonBackwardDifference(d, v, nextPoint) << endl;
 			cout << "The value for forward is: " << NewtonForwardDifference(d, v, nextPoint) << endl;
 
-			vector<vector<long double>> cubicSpline = NaturalCubicSpline(v);
-			for (int i = 0; i < cubicSpline.size(); i++) {
+			cout << "The coefficient for Natural Cubic Spline is:\n";
+			vector<vector<long double>> naturalCubicSpline = NaturalCubicSpline(v);
+			for (int i = 0; i < naturalCubicSpline.size(); i++) {
 				for (int j = 0; j < 4; j++) {
-					cout << cubicSpline[i][j] << " ";
+					cout << naturalCubicSpline[i][j] << " ";
+				}
+				cout << endl;
+			}
+
+			cout << "f'(x0) = "; 
+			long double FPO; cin >> FPO;
+			cout << "f'(xn) = ";
+			long double FPN; cin >> FPN;
+
+			cout << "The coefficient for Clamped Cubic Spline is:\n";
+			vector<vector<long double>> clampedCubicSpline = ClampedCubicSpline(v, FPO, FPN);
+			for (int i = 0; i < clampedCubicSpline.size(); i++) {
+				for (int j = 0; j < 4; j++) {
+					cout << clampedCubicSpline[i][j] << " ";
 				}
 				cout << endl;
 			}
@@ -568,22 +587,30 @@ int main() {
 			cin.ignore();
 			vector<string> func;
 			input(func);
+			
 
 			cout << "Enter the interval [a, b]:\n";
 			long double a, b;
 			cout << "a = "; cin >> a;
 			cout << "b = "; cin >> b;
 
+
+			
 			cout << "Enter the number of intervals divided (even for Simpson and Midpoint rule): ";
 			switch (option) {
 			case SIMPSON:
 			{
-				int n; cin >> n;
+				
+				int n = 0; cin >> n;
+				
 				while (n % 2 != 0) {
 					cout << "Invalid number! The number of intervals divided has to be even. Please enter again: ";
 					cin >> n;
 				}
+
 				res = SimpsonIntegration(func, a, b, n);
+				
+				
 				break;
 			}
 			case TRAPEZOID:
@@ -604,6 +631,94 @@ int main() {
 			}
 			}
 			cout << "The result is: " << res << endl;
+			break;
+		}
+		case ODE:
+		{
+			cout << "Solve the ODE y'(x) = f(x, y)\n";
+
+			cout << "f(x, y) = ";
+			vector<string> func;
+			input(func);
+
+			cout << "x0 = ";
+			long double x0; cin >> x0;
+			cout << "y0 = ";
+			long double y0; cin >> y0;
+
+			cout << "h = ";
+			long double h; cin >> h;
+
+			cout << "Enter the number of steps: ";
+			int n; cin >> n;
+
+
+			vector<long double> res = FourthRungeKuttaODE(func, x0, y0, h, n);
+
+			cout << "The answer is:\n";
+			for (int i = 0; i < n; i++) {
+				cout << "Step " << i + 1 << ": " << x0 + (i + 1) * h << " " << res[i] << endl;
+			}
+			break;
+		}
+		case EIGENVALUE: 
+		{
+			cout << "Enter the size of matrix: ";
+			int n; cin >> n;
+
+			long double** matrix = new long double* [n];
+
+			cout << "Enter the matrix:\n";
+			for (int i = 0; i < n; i++) {
+				matrix[i] = new long double[n];
+				for (int j = 0; j < n; j++) {
+					cin >> matrix[i][j];
+				}
+			}
+
+			long double* eigenvector = new long double[n];
+			cout << "Enter the initial approximation: ";
+			for (int i = 0; i < n; i++) cin >> eigenvector[i];
+
+			int iteration;
+			cout << "Enter the number of iterations: "; 
+			cin >> iteration;
+
+			long double* tmp = new long double[n];
+
+			long double eigenvalue = 0;
+
+			for (int i = 1; i <= iteration; i++) {
+				eigenvalue = 0;
+				for (int j = 0; j < n; j++) {
+					long double a = 0;
+					for (int k = 0; k < n; k++) {
+						a += matrix[j][k] * eigenvector[k];
+					}
+					tmp[j] = a;
+					if (a > eigenvalue) eigenvalue = a;
+				}
+				for (int j = 0; j < n; j++) {
+					eigenvector[j] = tmp[j] / eigenvalue;
+				}
+				
+			}
+
+			cout << "The dominant eigenvalue is: " << eigenvalue << endl;
+			cout << "The corresponding eigenvector is: [ ";
+			for (int i = 0; i < n; i++) {
+				cout << eigenvector[i] << " ";
+			}
+			cout << "]" << endl;
+			
+			for (int i = 0; i < n; i++) {
+				delete[] matrix[i];
+			}
+			delete[] matrix;
+			delete[] eigenvector;
+			delete[] tmp;
+
+
 			break;
 		}
 		default:
