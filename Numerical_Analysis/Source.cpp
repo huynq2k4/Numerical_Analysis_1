@@ -23,6 +23,7 @@ enum feature{
 	DERIVATIVE,
 	INTEGRATION,
 	ODE,
+	SYSTEM_ODE,
 	EIGENVALUE
 };
 
@@ -76,8 +77,9 @@ void intro() {
 	cout << "5. Polynomial approximation for a set of points or a function.\n";
 	cout << "6. Calculate the derivative of a function at a given point.\n";
 	cout << "7. Calculate the integration of a function over an interval.\n";
-	cout << "8. Solve ordinary differential equation (ODE) or system of ODEs.\n";
-	cout << "9. Calculate the dominant eigenvalue and corresponding eigenvector of a square matrix.\n";
+	cout << "8. Solve ordinary differential equation (ODE).\n";
+	cout << "9. Solve system of ODEs.\n";
+	cout << "10. Calculate the dominant eigenvalue and corresponding eigenvector of a square matrix.\n";
 	cout << "-----------------------------\n";
 }
 
@@ -659,6 +661,60 @@ int main() {
 			for (int i = 0; i < n; i++) {
 				cout << "Step " << i + 1 << ": " << x0 + (i + 1) * h << " " << res[i] << endl;
 			}
+			break;
+		}
+		case SYSTEM_ODE:
+		{
+			cout << "Solve the system of ODEs: y_i'(x) = f(x, y1, y2, ..., y_n)\n";
+
+			cout << "Enter the number of equations: ";
+			int n; cin >> n;
+			cin.ignore();
+			//cout << "Enter the coefficient a0_i, a1_i,..., a_n_i:\n";
+			vector<vector<string>> sysFunc(n);
+			for (int i = 0; i < n; i++) {
+				cout << "y" << i + 1 << "'(x) = ";
+				/*vector<vector<string>> tmp(n + 1);
+				for (int j = 0; j <= n; j++) {
+					input2(tmp[j]);
+				}*/
+				input2(sysFunc[i]);
+			}
+			for (int i = 0; i < n; i++) {
+				for (auto x : sysFunc[i]) {
+					cout << x << " ";
+				}
+				cout << endl;
+			}
+
+
+			cout << "x0 = ";
+			long double x0; cin >> x0;
+			//cout << "Enter y0_i: ";
+			vector<long double> y0(n);
+			for (int i = 0; i < n; i++) {
+				cout << "y" << i + 1 << "(x0) = ";
+				cin >> y0[i];
+			}
+
+			cout << "h = ";
+			long double h; cin >> h;
+
+			cout << "Enter the number of steps: ";
+			int step; cin >> step;
+
+			vector<vector<long double>> res = FourthRungeKuttaODE(sysFunc, x0, y0, h, step);
+
+			cout << "The answer is:\n";
+			for (int i = 0; i < step; i++) {
+				cout << "Step " << i + 1 << ": " << x0 + (i + 1) * h << " ";
+				for (int j = 0; j < n; j++) {
+					cout << res[i][j] << " ";
+					
+				}
+				cout << endl;
+			}
+			
 			break;
 		}
 		case EIGENVALUE: 

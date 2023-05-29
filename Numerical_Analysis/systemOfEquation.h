@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <iomanip>
+#include "equation.h"
 
 using namespace std;
 
@@ -11,3 +12,5 @@ long double* Doolittle(long double** system, int n);
 long double* Cholesky(long double** system, int n);
 long double* Jacobi(long double** system, int n, long double* initVal, int precision);
 long double* GaussSeidel(long double** system, int n, long double* initVal, int precision);
+
+void input1(vector<string>& function);

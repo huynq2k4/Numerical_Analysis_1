@@ -1,5 +1,4 @@
 #include "systemOfEquation.h"
-#include "equation.h"
 
 
 void exchangeRows(long double** a, int nCols, int i, int j);
@@ -7,7 +6,6 @@ void showResult(long double** a, int nRows, int precision);
 
 void input1(vector<string>& function) {
     string s; cin >> s;
-    s.erase(remove(s.begin(), s.end(), ' '), s.end());
     int i = 0;
     while (i < s.length()) {
         string tmp = "";
